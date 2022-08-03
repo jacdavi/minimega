@@ -135,6 +135,7 @@ func filesHandler(w http.ResponseWriter, r *http.Request) {
 
 	cmd := NewCommand(r)
 	cmd.Command = fmt.Sprintf("ns run file list %q", subdir)
+	log.Info("Created command", cmd.String())
 	data := runTabular(cmd)
 
 	log.Info("path: `%v`, subdir: `%v`", path, subdir)
@@ -146,6 +147,8 @@ func filesHandler(w http.ResponseWriter, r *http.Request) {
 		files[v["name"]] = true
 	}
 
+	log.Info(fmt.Sprint(files), " ", len(files))
+
 	// handle special case -- requesting a single file
 	if len(files) == 1 {
 		f := data[0]
@@ -156,8 +159,11 @@ func filesHandler(w http.ResponseWriter, r *http.Request) {
 
 			w.Header().Set("Content-Disposition", "attachment; filename="+filepath.Base(subdir))
 			w.Header().Set("Content-Type", "application/octet-stream")
-
-			for resps := range mm.Run(cmd.String()) {
+			cancelRun := make(chan struct{})
+			defer close(cancelRun)
+			log.Info(cmd.String())
+			for resps := range mm.RunWithCancel(cmd.String(), cancelRun) {
+				log.Info("Running")
 				for _, resp := range resps.Resp {
 					if resp.Error != "" {
 						log.Errorln(resp.Error)

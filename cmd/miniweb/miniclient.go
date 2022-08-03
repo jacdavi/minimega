@@ -17,6 +17,7 @@ var mm *miniclient.Conn
 
 // noOp returns a closed channel
 func noOp() chan *miniclient.Response {
+	log.Info("noop")
 	out := make(chan *miniclient.Response)
 	close(out)
 	return out
@@ -24,12 +25,17 @@ func noOp() chan *miniclient.Response {
 
 // run minimega commands, automatically redialing if we were disconnected
 func run(c *Command) chan *miniclient.Response {
+	log.Info("miniclient run waiting for lock: %v", c.String())
 	mmMu.Lock()
 	defer mmMu.Unlock()
+	defer log.Info("miniclient defer")
 
 	var err error
 
+	log.Info("Calling miniclient run: %v", c.String())
+
 	if mm == nil {
+		log.Info("Dialing")
 		if mm, err = miniclient.Dial(*f_base); err != nil {
 			log.Error("unable to dial: %v", err)
 			return noOp()
@@ -39,12 +45,14 @@ func run(c *Command) chan *miniclient.Response {
 	// check if there's already an error and try to redial
 	if err := mm.Error(); err != nil {
 		s := err.Error()
-		if strings.Contains(s, "broken pipe") || strings.Contains(s, "no such file or directory") {
+		log.Debug("miniclient saw error: %v", s)
+		if strings.Contains(s, "broken pipe") || strings.Contains(s, "no such file or directory") || strings.Contains(s, "requester disconnected") {
+			log.Info("Redialing")
 			if mm, err = miniclient.Dial(*f_base); err != nil {
 				log.Error("unable to redial: %v", err)
 				return noOp()
 			}
-		} else {
+		} else if !strings.Contains(s, "requester disconnected") {
 			return noOp()
 		}
 	}
