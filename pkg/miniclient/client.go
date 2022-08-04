@@ -185,7 +185,6 @@ func (mm *Conn) Run(cmd string) chan *Response {
 // (e.g., in the case that the caller experiences an error).
 func (mm *Conn) RunWithCancel(cmd string, cancel <-chan struct{}) chan *Response {
 	out := make(chan *Response)
-	log.Info("Run called: %v", cmd)
 
 	if cmd == "" {
 		// Language spec: "Receiving from a nil channel blocks forever."
@@ -213,7 +212,6 @@ func (mm *Conn) RunWithCancel(cmd string, cancel <-chan struct{}) chan *Response
 		defer mm.lock.Unlock()
 		defer close(out)
 		defer log.Error("DEFER RUN")
-		log.Info("Command running in sep thread: %v", cmd)
 
 		for {
 			var r Response
@@ -229,10 +227,8 @@ func (mm *Conn) RunWithCancel(cmd string, cancel <-chan struct{}) chan *Response
 
 			select {
 			case out <- &r:
-				log.Info("Wrote data")
 			case <-cancel:
 				mm.err = errors.New("requester disconnected")
-				// r.More = false
 				log.Error("Received done signal from client")
 				return
 			}
@@ -290,10 +286,8 @@ func (mm *Conn) Suggest(input string) []string {
 }
 
 func (mm *Conn) Error() error {
-	log.Info("Grabbing error from clinet")
 	mm.lock.Lock()
 	defer mm.lock.Unlock()
-	log.Info("Got error from client")
 	return mm.err
 }
 
