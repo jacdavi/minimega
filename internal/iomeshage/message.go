@@ -171,6 +171,11 @@ func (this Files) use(path, hash string, local bool) (*Message, bool) {
 		return use, true
 	}
 
+	// at this point, stick with local copy if present.
+	if local {
+		return nil, true
+	}
+
 	// All the file hashes were the same, so just use the first message present.
 	// This will always be the case when file hashing is disabled.
 	for _, msg := range this.msgMap[path] {
