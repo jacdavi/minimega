@@ -15,6 +15,9 @@ func transcode(in, out string) error {
 	p := "ffmpeg"
 
 	var args []string
+	args = append(args, "-loglevel")
+	args = append(args, "warning")
+	args = append(args, "-y") //overwrite existing files
 	args = append(args, "-f")
 	args = append(args, "mjpeg")
 	args = append(args, "-r")
@@ -35,7 +38,7 @@ func transcode(in, out string) error {
 		return err
 	}
 	log.LogAll(stdout, log.INFO, "ffmpeg")
-	log.LogAll(stderr, log.INFO, "ffmpeg")
+	log.LogAll(stderr, log.ERROR, "ffmpeg")
 
 	err = cmd.Run()
 	if err != nil {

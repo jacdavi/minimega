@@ -17,6 +17,7 @@ import (
 	"net/textproto"
 	"net/url"
 	"path"
+	"sort"
 	"strings"
 	"time"
 
@@ -84,6 +85,7 @@ func dirList(w http.ResponseWriter, f http.File) {
 			break
 		}
 
+		sort.Slice(dirs, func(i, j int) bool { return dirs[i].Name() < dirs[j].Name() })
 		for _, d := range dirs {
 			name := d.Name()
 			if d.IsDir() {

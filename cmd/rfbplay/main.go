@@ -174,7 +174,6 @@ func main() {
 	log.Init()
 
 	addr := ":" + strconv.Itoa(*f_port)
-	log.Info("serving recordings from %s on %s", flag.Arg(0), addr)
 
 	switch flag.NArg() {
 	case 1: // just serve a directory and mjpeg streams
@@ -184,6 +183,7 @@ func main() {
 			usage()
 			os.Exit(1)
 		}
+		fmt.Printf("serving recordings from %s on %s\n", flag.Arg(0), addr)
 		http.Handle("/", &playbackServer{http.Dir(flag.Arg(0))})
 		http.ListenAndServe(addr, nil)
 	case 2: // transcode with ffmpeg
