@@ -392,8 +392,12 @@ func namespaceCommands(ns *Namespace, cmd *minicli.Command) []*minicli.Command {
 	for host := range ns.Hosts {
 		if host == hostname {
 			// Create a deep copy of the command by recompiling it
-			cmd2 := minicli.MustCompile(cmd.Original)
-			cmds = append(cmds, cmd2)
+			cmd2, err := minicli.Compile(cmd.Original)
+			if err != nil {
+				log.Error(fmt.Sprintf("could not compile cmd '%s': %s", cmd.Original, err.Error()))
+			} else {
+				cmds = append(cmds, cmd2)
+			}
 		} else {
 			// Quote the hostname in case there are spaces
 			peers = append(peers, strconv.Quote(host))

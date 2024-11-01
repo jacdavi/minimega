@@ -197,7 +197,7 @@ func ProcessCommand(c *Command) <-chan Responses {
 func MustCompile(input string) *Command {
 	c, err := Compile(input)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln(fmt.Errorf("fatal error compiling input '%s': %w", input, err))
 	}
 
 	return c
