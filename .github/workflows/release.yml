@@ -1,4 +1,4 @@
-name: Build, Sign, and Draft Release
+name: Create Draft Release
 
 on:
   workflow_dispatch:
@@ -40,6 +40,8 @@ jobs:
           tar -czvf minimega-${{ env.version }}-binaries.tar.gz minimega
       - name: Download artifacts
         uses: actions/download-artifact@v4
+      - name: temp
+        run: ls -R
       - name: Create Release
         uses: softprops/action-gh-release@v2
         id: create-release
