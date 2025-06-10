@@ -17,7 +17,7 @@ jobs:
     uses: ./.guthub/workflows/rpm.yml
   build-and-draft:
     name: Build and Draft Release
-    needs: [deb-build, rpm-build]
+    needs: [deb-build, rpm-build, binary-build]
     runs-on: ubuntu-latest
     permissions:
       id-token: write
