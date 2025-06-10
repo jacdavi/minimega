@@ -34,7 +34,8 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
       - name: temp
-        run: ls -lh
+        run: |
+          ls minimega* -lh
       - name: Create Release
         uses: softprops/action-gh-release@v2
         id: create-release
