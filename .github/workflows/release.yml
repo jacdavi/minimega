@@ -7,11 +7,14 @@ permissions: read-all
 
 jobs:
   deb-build:
-    name: Build deb file
+    name: Build deb File
     uses: ./.github/workflows/deb.yml
   rpm-build:
-    name: Build rpm file
+    name: Build rpm File
     uses: ./.github/workflows/rpm.yml
+  binary-build:
+    name: Build Binaries
+    uses: ./.guthub/workflows/rpm.yml
   build-and-draft:
     name: Build and Draft Release
     needs: [deb-build, rpm-build]
@@ -28,20 +31,10 @@ jobs:
         run: |
           VER=$(cat minimega/VERSION | cut -d'=' -f2)
           echo "version=$VER" >> $GITHUB_ENV
-      - name: Install Build Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential dnsmasq iproute2 isc-dhcp-client libpcap-dev ntfs-3g openssh-client openvswitch-switch qemu-kvm qemu-utils
-      - name: Build and zip
-        run: |
-          cd minimega
-          ./scripts/all.bash
-          cd ..
-          tar -czvf minimega-${{ env.version }}-binaries.tar.gz minimega
       - name: Download artifacts
         uses: actions/download-artifact@v4
       - name: temp
-        run: ls -R
+        run: ls -lh
       - name: Create Release
         uses: softprops/action-gh-release@v2
         id: create-release
@@ -51,8 +44,8 @@ jobs:
           name: minimega ${{ env.version }}
           tag_name: ${{ inputs.version }}
           files: |
-            minimega-${{ env.version }}-binaries.tar.gz
-            *.deb
-            *.rpm
+            minimega-binaries/*.tar.gz
+            minimega-deb/*.deb
+            minimega-rpm/*.rpm
           generate_release_notes: true
           fail_on_unmatched_files: true
