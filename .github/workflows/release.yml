@@ -1,0 +1,51 @@
+name: Build, Sign, and Draft Release
+
+on:
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  deb-build:
+    name: Build deb file
+    uses: ./.github/workflows/deb.yml
+  rpm-build:
+    name: Build rpm file
+    uses: ./.github/workflows/rpm.yml
+  build-and-draft:
+    name: Build and Draft Release
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          path: minimega
+      - name: Get version
+        run: |
+          VER=$(cat minimega/VERSION | cut -d'=' -f2)
+          echo "version=$VER" >> $GITHUB_ENV
+      - name: Build and zip
+        run: |
+          cd minimega
+          ./scripts/all.bash
+          cd ..
+          tar -czvf minimega-${{ env.version }}-binaries.tar.gz minimega
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        id: create-release
+        with:
+          draft: true
+          prerelease: false
+          name: minimega ${{ env.version }}
+          tag_name: ${{ inputs.version }}
+          files: |
+            minimega-${{ env.version }}-binaries.tar.gz
+            *.deb
+            *.rpm
+          generate_release_notes: true
+          fail_on_unmatched_files: true
