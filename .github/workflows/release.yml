@@ -47,6 +47,6 @@ jobs:
           files: |
             minimega-binaries/*.tar.gz
             minimega-deb/*.deb
-            minimega-rpm/*.rpm
+            minimega-rpm/**/*.rpm
           generate_release_notes: true
           fail_on_unmatched_files: true
